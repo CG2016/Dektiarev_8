@@ -39,52 +39,6 @@ public class Controller {
         bValue = (1 - yValue) * 255;
     }
 
-    /*public void fromRGBtoHLS() { //Observer. = 2°, Illuminant = D65
-        double varR = rValue / 255;
-        double varG = gValue / 255;
-        double varB = bValue / 255;
-
-        double minValue = Math.min(Math.min(varR, varG), varB);
-        double maxValue = Math.max(Math.max(varR, varG), varB);
-        double delta = maxValue - minValue;
-
-        lValue = (minValue + maxValue) / 2;
-
-        if(maxValue == minValue) {
-            hValue = 0;
-            sValue = 0;
-        }
-        else {
-            if(lValue < 0.5) {
-                sValue = delta / (maxValue + minValue);
-            }
-            else {
-                sValue = delta / (2 - maxValue - minValue);
-            }
-
-            double deltaR = (((maxValue - varR) / 6) + (delta / 2)) / delta;
-            double deltaG = (((maxValue - varG) / 6) + (delta / 2)) / delta;
-            double deltaB = (((maxValue - varB) / 6) + (delta / 2)) / delta;
-
-            if(varR == maxValue) {
-                hValue = deltaB - deltaG;
-            }
-            else if(varG == maxValue) {
-                hValue = (1 / 3) + deltaR - deltaB;
-            }
-            else {
-                hValue = (2 / 3) + deltaG - deltaR;
-            }
-
-            if(hValue < 0) {
-                hValue += 1;
-            }
-            else if(hValue > 1) {
-                hValue -= 1;
-            }
-        }
-    }*/
-
     public void fromRGBtoHLS() {
         double varR = rValue / 255;
         double varG = gValue / 255;
