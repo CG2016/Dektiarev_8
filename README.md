@@ -1,1 +1,1 @@
-# Dektiarev_8
+Computer Graphics labs repository. Vladislav Dektiarev. Variant 8.
