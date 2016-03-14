@@ -12,19 +12,20 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import org.apache.commons.imaging.color.ColorCieLuv;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import org.apache.commons.imaging.color.ColorCieLab;
 import org.apache.commons.imaging.color.ColorConversions;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageFilter;
 import java.io.File;
 import java.io.IOException;
 
 public class Controller {
 
-    public static final String IMAGE_URL = "xp.jpg";
+    public File imageFile;
 
     private int rBefore = 0;
     private int gBefore = 0;
@@ -78,6 +79,8 @@ public class Controller {
     @FXML
     private ProgressBar progressBar;
 
+    @FXML
+    public Button saveButton;
 
     private BufferedImage bufferedImageBefore;
     private BufferedImage bufferedImageAfter;
@@ -87,7 +90,7 @@ public class Controller {
         progressBar.setStyle("-fx-accent: #0093ff;");
 
         try {
-            bufferedImageAfter = ImageIO.read(new File(IMAGE_URL));
+            bufferedImageAfter = ImageIO.read(imageFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -115,15 +118,20 @@ public class Controller {
                     for(int y = 0; y < height; y++) {
                         updateProgress((double) x, (double) width);
 
-                        ColorCieLuv actColor =
-                                ColorConversions.convertXYZtoCIELuv(ColorConversions.convertRGBtoXYZ(bufferedImageAfter.getRGB(x, y)));
+                        ColorCieLab actColor =
+                                ColorConversions.convertXYZtoCIELab(ColorConversions.convertRGBtoXYZ(bufferedImageAfter.getRGB(x, y)));
                         java.awt.Color colorRGBBefore = new java.awt.Color(rBefore, gBefore, bBefore);
-                        ColorCieLuv colorBefore =
-                                ColorConversions.convertXYZtoCIELuv(ColorConversions.convertRGBtoXYZ(colorRGBBefore.getRGB()));
-                        if(Math.sqrt(Math.pow((actColor.u - colorBefore.u), 2) + Math.pow((actColor.v - colorBefore.v), 2)) < fault) {
-                            ColorCieLuv colorAfter = ColorConversions.convertXYZtoCIELuv(ColorConversions.convertRGBtoXYZ(new java.awt.Color(rAfter, gAfter, bAfter).getRGB()));
-                            ColorCieLuv finalColorLuv = new ColorCieLuv(actColor.L, colorAfter.u, colorAfter.v);
-                            java.awt.Color finalColor = new java.awt.Color(ColorConversions.convertXYZtoRGB(ColorConversions.convertCIELuvtoXYZ(finalColorLuv)));
+                        ColorCieLab colorBefore =
+                                ColorConversions.convertXYZtoCIELab(ColorConversions.convertRGBtoXYZ(colorRGBBefore.getRGB()));
+                        if(Math.sqrt(Math.pow((actColor.a - colorBefore.a), 2) + Math.pow((actColor.b - colorBefore.b), 2) +
+                                Math.pow((actColor.L - colorBefore.L) / 3, 2)) <= fault) {
+                            ColorCieLab colorAfter =
+                                    ColorConversions.convertXYZtoCIELab(ColorConversions.convertRGBtoXYZ(new java.awt.Color(rAfter, gAfter, bAfter).getRGB()));
+                            ColorCieLab finalColorLab = new ColorCieLab((colorAfter.L + (actColor.L - colorBefore.L)),
+                                    (colorAfter.a + (actColor.a - colorBefore.a)),
+                                    (colorAfter.b + (actColor.b - colorBefore.b)));
+                            java.awt.Color finalColor =
+                                    new java.awt.Color(ColorConversions.convertXYZtoRGB(ColorConversions.convertCIELabtoXYZ(finalColorLab)));
                             bufferedImageAfter.setRGB(x, y, finalColor.getRGB());
                         }
                     }
@@ -149,9 +157,9 @@ public class Controller {
     @FXML
     void setSliders(ActionEvent event) {
         Color color = colorPicker.getValue();
-        rBeforeSlider.setValue(color.getRed() * 255);
-        gBeforeSlider.setValue(color.getGreen() * 255);
-        bBeforeSlider.setValue(color.getBlue() * 255);
+        rAfterSlider.setValue(color.getRed() * 255);
+        gAfterSlider.setValue(color.getGreen() * 255);
+        bAfterSlider.setValue(color.getBlue() * 255);
     }
 
     private void setSliderListeners() {
@@ -167,6 +175,7 @@ public class Controller {
             gAfter = (int) gAfterSlider.getValue();
             bAfter = (int) bAfterSlider.getValue();
             rectAfter.setFill(Color.rgb(rAfter, gAfter, bAfter));
+            colorPicker.setValue(Color.rgb(rAfter, gAfter, bAfter));
         };
 
         rBeforeSlider.valueProperty().addListener(changeBeforeValuesListener);
@@ -181,7 +190,13 @@ public class Controller {
     @FXML
     void initialize() {
         try {
-            bufferedImageBefore = ImageIO.read(new File(IMAGE_URL));
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image files", "*.jpg", "*.png", "*.bmp"));
+            fileChooser.setTitle("Open image");
+            imageFile = fileChooser.showOpenDialog(new Stage());
+
+            bufferedImageBefore = ImageIO.read(imageFile);
             Image imageFx = SwingFXUtils.toFXImage(bufferedImageBefore, null);
             imageAfter.setImage(imageFx);
             imageBefore.setImage(imageFx);
@@ -199,6 +214,19 @@ public class Controller {
                     e.printStackTrace();
                 }
             });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void saveImage(ActionEvent actionEvent) {
+        FileChooser chooser  = new FileChooser();
+        chooser.setTitle("Save Image");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image File", "*.png"));
+        File file = chooser.showSaveDialog(new Stage());
+        try {
+            ImageIO.write(bufferedImageAfter, "png", file);
         } catch (IOException e) {
             e.printStackTrace();
         }

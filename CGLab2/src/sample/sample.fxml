@@ -23,7 +23,7 @@
       <Label layoutX="72.0" layoutY="528.0" text="G" />
       <Label layoutX="73.0" layoutY="572.0" text="B" />
       <Button fx:id="transformButton" layoutX="548.0" layoutY="629.0" mnemonicParsing="false" onAction="#transformImage" text="Transform" />
-      <ColorPicker fx:id="colorPicker" layoutX="251.0" layoutY="629.0" onAction="#setSliders" />
+      <ColorPicker fx:id="colorPicker" layoutX="929.0" layoutY="629.0" onAction="#setSliders" />
       <Label layoutX="695.0" layoutY="572.0" text="B" />
       <Label layoutX="694.0" layoutY="528.0" text="G" />
       <Label layoutX="695.0" layoutY="482.0" text="R" />
@@ -35,5 +35,6 @@
       <Rectangle fx:id="rectBefore" arcHeight="5.0" arcWidth="5.0" height="75.0" layoutX="511.0" layoutY="504.0" stroke="BLACK" strokeType="INSIDE" width="75.0" />
       <Rectangle fx:id="rectAfter" arcHeight="5.0" arcWidth="5.0" height="75.0" layoutX="616.0" layoutY="504.0" stroke="BLACK" strokeType="INSIDE" width="75.0" />
       <ProgressBar fx:id="progressBar" layoutX="548.0" layoutY="598.0" prefHeight="27.0" prefWidth="105.0" progress="0.0" />
+      <Button fx:id="saveButton" layoutX="890.0" layoutY="429.0" mnemonicParsing="false" onAction="#saveImage" text="Save As..." />
    </children>
 </AnchorPane>
