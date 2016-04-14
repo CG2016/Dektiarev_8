@@ -4,8 +4,15 @@ import by.bsu.dektiarev.util.*;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
+import org.knowm.xchart.XYSeries;
+import org.knowm.xchart.style.markers.Marker;
+import org.knowm.xchart.style.markers.Square;
 
 import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,7 +22,7 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
-        LineRasterizator rasterizator = new DDARasterizator();
+        LineRasterizator rasterizator = new BresenhamRasterizator();
         BresenhamCircleRasterisator bresenhamCircleRasterisator = new BresenhamCircleRasterisator();
 
         Scanner scanner = new Scanner(System.in);
@@ -37,12 +44,31 @@ public class Main {
             pointList = rasterizator.rasterize(pointB, pointA);
         }
 
-        //pointList = bresenhamCircleRasterisator.rasterise(100);
+        int radius = 100;
+        pointList = bresenhamCircleRasterisator.rasterise(50, radius, radius);
 
         int[][] coords = CoordConverter.convert(pointList);
 
+        try {
+            PrintWriter printWriter = new PrintWriter(new BufferedWriter(new FileWriter(new java.io.File("res.txt"))));
+            FileMaker fileMaker = new FileMaker();
+            int[][] points = fileMaker.makeFile(pointList, 200);
+            for(int[] pointArr : points) {
+                for(int point : pointArr) {
+                    printWriter.print(point + " ");
+                }
+                printWriter.println();
+            }
+            printWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         XYChart chart = new XYChartBuilder().build();
         chart.addSeries("pixels", coords[0], coords[1]);
+        chart.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Scatter);
+        chart.getStyler().setSeriesMarkers(new Marker[] {new Square()});
         new SwingWrapper<XYChart>(chart).displayChart();
     }
 }
