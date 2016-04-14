@@ -9,17 +9,17 @@ import java.util.List;
  */
 public class BresenhamCircleRasterisator {
 
-    public List<Point> rasterise(int radius) {
+    public List<Point> rasterise(int radius, int centerX, int centerY) {
         List<Point> pointList = new ArrayList<>();
         int x = 0;
         int y = radius;
         int delta = 1 - radius * 2;
-        int error = 0;
+        int error;
         while( y >= 0) {
-            pointList.add(new Point(x, y));
-            pointList.add(new Point(x, -y));
-            pointList.add(new Point(-x, y));
-            pointList.add(new Point(-x, -y));
+            pointList.add(new Point(centerX + x, centerY + y));
+            pointList.add(new Point(centerX + x, centerY -y));
+            pointList.add(new Point(centerX -x, centerY + y));
+            pointList.add(new Point(centerX -x, centerY -y));
 
             error = 2 * (delta + y) - 1;
             if((delta < 0) && (error <= 0)) {
